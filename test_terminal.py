@@ -191,7 +191,7 @@ def main():
         cards=selected,
         completed_tasks=completed if completed else ["없음"],
         incomplete_tasks=incomplete if incomplete else ["없음"],
-        nlp_result=nlp_result
+        nlp_result=nlp_result,
         temperature = TEMPERATURE
     )
     print(retrospective)
