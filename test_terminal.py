@@ -8,6 +8,8 @@ from llm_handler import generate_fortune, generate_advice, generate_retrospectiv
 # 유틸 함수
 # ─────────────────────────────────────────────
 
+TEMPERATURE = 0.3
+
 def print_divider(title=""):
     if title:
         print(f"\n{'=' * 40}")
@@ -115,7 +117,7 @@ def main():
     # ── 2단계: 운세 출력 ──
     print_divider("2단계 | 오늘의 운세")
     print("🔮 운세를 뽑는 중...\n")
-    fortune = generate_fortune(selected, nlp_result)
+    fortune = generate_fortune(selected, nlp_result, temperature = TEMPERATURE)
     print(fortune)
 
     # ── 3단계: 컨디션 입력 ──
@@ -145,7 +147,8 @@ def main():
         cards=selected,
         tasks=", ".join(tasks),
         condition=condition,
-        nlp_result=nlp_result
+        nlp_result=nlp_result,
+        temperature = TEMPERATURE
     )
     print(advice)
 
@@ -189,6 +192,7 @@ def main():
         completed_tasks=completed if completed else ["없음"],
         incomplete_tasks=incomplete if incomplete else ["없음"],
         nlp_result=nlp_result
+        temperature = TEMPERATURE
     )
     print(retrospective)
 
