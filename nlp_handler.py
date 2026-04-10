@@ -162,31 +162,29 @@ def postprocess_fortune(fortune_text: str) -> dict:
 # 5. 비교 분석 함수 — 보고서용
 # ─────────────────────────────────────────────
 
-def compare_keywords(original_keywords: list[str], llm_keywords: list[str]) -> dict:
-    """
-    원본 카드 키워드(A 제작) vs LLM 운세 키워드 일치율 계산
-    
-    Args:
-        original_keywords: cards.json의 keywords 리스트
-        llm_keywords: postprocess_fortune()으로 추출한 키워드 리스트
-    
-    Returns:
-        {
-            "match_count": int,
-            "match_rate": float (0~1),
-            "matched_keywords": [str, ...]
-        }
-    """
+def compare_keywords(original_keywords: list, llm_keywords: list) -> dict:
     original_set = set(original_keywords)
     llm_set = set(llm_keywords)
-    matched = original_set & llm_set
-    
-    match_rate = len(matched) / len(original_set) if original_set else 0.0
-    
+
+    # 완전 일치
+    exact_matched = original_set & llm_set
+
+    # 부분 일치 (원본 키워드가 LLM 키워드에 포함되거나 반대)
+    partial_matched = set()
+    for orig in original_set:
+        for llm in llm_set:
+            if orig in llm or llm in orig:
+                partial_matched.add(orig)
+
+    all_matched = exact_matched | partial_matched
+    match_rate = len(all_matched) / len(original_set) if original_set else 0.0
+
     return {
-        "match_count": len(matched),
-        "match_rate": round(match_rate, 4),
-        "matched_keywords": list(matched)
+        "exact_match_count":   len(exact_matched),
+        "partial_match_count": len(partial_matched),
+        "match_rate":          round(match_rate, 4),
+        "exact_matched":       list(exact_matched),
+        "partial_matched":     list(partial_matched)
     }
 
 
