@@ -71,10 +71,13 @@ def main():
     all_cards = []
     for i in range(22):
         is_reversed = random.choice([True, False])
-        if is_reversed:
-            card = {**cards_reversed[i], "reversed": True}
-        else:
-            card = {**cards_normal[i], "reversed": False}
+        card = {
+            **cards_normal[i],          # name은 정방향 기준으로 통일
+            "reversed": is_reversed,
+            "meaning": cards_reversed[i]["meaning"] if is_reversed else cards_normal[i]["meaning"],
+            "keywords": cards_reversed[i]["keywords"] if is_reversed else cards_normal[i]["keywords"],
+            "energy": cards_reversed[i]["energy"] if is_reversed else cards_normal[i]["energy"],
+        }
         all_cards.append(card)
 
     # 섞기
