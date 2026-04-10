@@ -184,7 +184,8 @@ def compare_keywords(original_keywords: list, llm_keywords: list) -> dict:
         "partial_match_count": len(partial_matched),
         "match_rate":          round(match_rate, 4),
         "exact_matched":       list(exact_matched),
-        "partial_matched":     list(partial_matched)
+        "partial_matched":     list(partial_matched),
+        "matched_keywords":    list(all_matched)
     }
 
 
