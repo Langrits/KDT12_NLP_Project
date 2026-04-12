@@ -18,9 +18,9 @@ def test_fortune_returns_summary_and_text(client):
         resp = client.post("/fortune", json={"cards": SAMPLE_CARDS})
     assert resp.status_code == 200
     data = resp.json()
-    assert "summary" in data
-    assert "fortune" in data
-    assert "nlp_result" in data
+    assert data["summary"] == "새 출발"
+    assert data["fortune"] == "좋은 하루"
+    assert data["nlp_result"]["sentiment_label"] == "positive"
 
 
 def test_fortune_requires_three_cards(client):

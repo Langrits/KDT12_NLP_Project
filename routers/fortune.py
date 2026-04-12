@@ -35,7 +35,7 @@ class FortuneResponse(BaseModel):
 
 def _parse_llm(text: str) -> tuple[str, str]:
     """LLM 응답에서 한 줄 요약과 본문을 분리한다."""
-    summary, body = "", text
+    summary, body = "", ""
     for line in text.splitlines():
         if line.startswith("한 줄 요약:"):
             summary = line.replace("한 줄 요약:", "").strip()
