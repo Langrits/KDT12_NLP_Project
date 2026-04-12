@@ -19,7 +19,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/card_img", StaticFiles(directory="card_img"), name="card_img")
+if os.path.isdir("card_img"):
+    app.mount("/card_img", StaticFiles(directory="card_img"), name="card_img")
 
 app.include_router(cards.router, prefix="/cards", tags=["cards"])
 app.include_router(fortune.router, tags=["fortune"])
