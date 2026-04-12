@@ -41,7 +41,7 @@ def get_records(year: int, month: int):
         supabase.table("daily_records")
         .select("date,summary,cards,nlp_result,retro_summary")
         .gte("date", start)
-        .lte("date", end)
+        .lt("date", end)
         .order("date", desc=True)
         .execute()
     )
