@@ -33,7 +33,7 @@ def test_save_record_returns_date(client):
 
 def test_get_records_by_month(client):
     mock_sb = MagicMock()
-    mock_sb.table.return_value.select.return_value.gte.return_value.lte.return_value.order.return_value.execute.return_value.data = [
+    mock_sb.table.return_value.select.return_value.gte.return_value.lt.return_value.order.return_value.execute.return_value.data = [
         {"date": "2026-04-12", "summary": "새 출발", "cards": [], "nlp_result": {"sentiment_label": "positive"}}
     ]
     with patch("routers.records.supabase", mock_sb):
