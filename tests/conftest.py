@@ -5,8 +5,8 @@ from unittest.mock import MagicMock
 
 
 def _mock_heavy_modules():
-    """keybert / transformers / sentence_transformers / konlpy 등
-    무거운 ML 패키지가 없어도 테스트가 돌아가도록 sys.modules에 미리 심어둔다."""
+    """keybert / transformers / sentence_transformers / konlpy / openai 등
+    무거운 ML 패키지나 외부 의존성이 없어도 테스트가 돌아가도록 sys.modules에 미리 심어둔다."""
     for mod_name in [
         "keybert",
         "transformers",
@@ -15,6 +15,7 @@ def _mock_heavy_modules():
         "konlpy",
         "konlpy.tag",
         "konlpy.tag._okt",
+        "openai",
     ]:
         if mod_name not in sys.modules:
             sys.modules[mod_name] = MagicMock()
