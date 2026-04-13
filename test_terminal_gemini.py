@@ -8,7 +8,7 @@ from llm_handler_gemini import generate_fortune, generate_advice, generate_retro
 # 유틸 함수
 # ─────────────────────────────────────────────
 
-TEMPERATURE = 0.3
+TEMPERATURE = 0.7
 
 def print_divider(title=""):
     if title:
