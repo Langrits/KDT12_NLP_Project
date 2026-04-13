@@ -2,7 +2,7 @@
 
 import random
 from nlp_handler import extract_keywords, analyze_sentiment, load_cards
-from llm_handler import generate_fortune, generate_advice, generate_retrospective
+from llm_handler_gemini import generate_fortune, generate_advice, generate_retrospective
 
 # ─────────────────────────────────────────────
 # 유틸 함수
