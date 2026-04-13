@@ -1,7 +1,6 @@
 """
 nlp_handler.py
-C 담당 — KeyBERT 키워드 추출 + 감성 분석 파이프라인
-B한테 넘길 nlp_result 딕셔너리 생성
+이현아 — KeyBERT 키워드 추출 + 감성 분석 파이프라인
 """
 
 import json
@@ -14,12 +13,14 @@ from sentence_transformers import SentenceTransformer
 # 모델 초기화 (파일 import 시 한 번만 로드)
 # ─────────────────────────────────────────────
 
-# KeyBERT — 한국어 포함 다국어 모델
 from sentence_transformers import SentenceTransformer
+
+# Microsoft가 만든 다국어 문장 임베딩 모델 (텍스트 의미 벡터화)
 st_model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+# KeyBERT: 문장 핵심 키워드 자동 추출 라이브러리
 kw_model = KeyBERT(model=st_model)
 
-# 감성 분석 — snunlp/KR-ELECTRA (한국어 특화)
+# DistilBERT 기반 다국어 감성 분석 모델
 sentiment_pipeline = pipeline(
     "text-classification",
     model="lxyuan/distilbert-base-multilingual-cased-sentiments-student",
@@ -30,6 +31,8 @@ sentiment_pipeline = pipeline(
 # ─────────────────────────────────────────────
 # 1. 키워드 추출
 # ─────────────────────────────────────────────
+
+# 키워드 정확도 향상을 위해 Okt(KoNLPy)로 조사 제거, 명사만 추출
 
 from konlpy.tag import Okt
 okt = Okt()
@@ -47,10 +50,10 @@ def extract_keywords(text: str, top_n: int = 5) -> list[str]:
     results = kw_model.extract_keywords(
         noun_text,
         keyphrase_ngram_range=(1, 1),  # 명사만 쓰니까 1단어로
-        stop_words=None,
-        top_n=top_n,
-        use_mmr=True,
-        diversity=0.5,
+        stop_words=None,               # 불용어 처리 없음 (Okt가 이미 했으니까)
+        top_n=top_n,                   # 상위 5개만
+        use_mmr=True,                  # 키워드끼리 중복 방지
+        diversity=0.5,                 # 다양성 조절 (0~1, 높을수록 다양)
         candidates=None
     )
     return [kw for kw, score in results]
@@ -69,7 +72,7 @@ def analyze_sentiment(text: str) -> dict:
     
     Returns:
         {
-            "sentiment_score": float (0~1, 1에 가까울수록 긍정),
+            "sentiment_score": float (0.5이상이면 긍정),
             "sentiment_label": str ("positive" or "negative")
         }
     """
@@ -78,14 +81,16 @@ def analyze_sentiment(text: str) -> dict:
     # 레이블별 점수 추출
     scores = {item["label"]: item["score"] for item in results}
     
-    # 모델 레이블: "positive" / "negative" (또는 "LABEL_0" / "LABEL_1")
-    # snunlp 모델 기준으로 positive 점수 사용
+    # 사용 모델: lxyuan/distilbert-base-multilingual-cased-sentiments-student
+    # 반환 레이블: "positive" / "neutral" / "negative"
+    # positive 점수를 기준으로 감성 판별 (0.5 이상 → positive)
     if "positive" in scores:
         pos_score = scores["positive"]
+    # (모델 교체 시) 일부 모델은 LABEL_0 / LABEL_1 형태로 반환하는 경우 대비    
     elif "LABEL_1" in scores:
         pos_score = scores["LABEL_1"]
     else:
-        # fallback: 가장 높은 점수 레이블이 positive인지 판단
+        # fallback: 모델 레이블이 다를 경우 최고 점수 레이블로 판단
         top = max(results, key=lambda x: x["score"])
         pos_score = top["score"] if "pos" in top["label"].lower() else 1 - top["score"]
     
@@ -98,19 +103,19 @@ def analyze_sentiment(text: str) -> dict:
 
 
 # ─────────────────────────────────────────────
-# 3. 전처리 함수 — B한테 넘길 nlp_result 생성
+# 3. 전처리 함수 — LLM에 넘길 nlp_result 생성
 # ─────────────────────────────────────────────
 
 def preprocess_card(card: dict) -> dict:
     """
-    카드 데이터를 받아 NLP 전처리 후 B에게 넘길 딕셔너리 반환
+    카드 데이터를 받아 NLP 전처리 후 LLM에 넘길 딕셔너리 반환
     
     Args:
         card: cards.json 또는 cards_reversed.json의 카드 딕셔너리
               {"id": 0, "name": "바보", "meaning": "...", "keywords": [...], ...}
     
     Returns:
-        B와 합의한 형식:
+        합의한 형식:
         {
             "keywords": [...],
             "sentiment_score": float,
